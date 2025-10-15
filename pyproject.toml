@@ -3,5 +3,22 @@ name = "easy-shape"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.11"
+dependencies = ["cosymlib"]
+
+# CLI コマンド: `shape-measure` を提供
+[project.scripts]
+shape-measure = "shape_measure.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.extra-build-dependencies]
+huckelpy = ["numpy"]
+cosymlib = ["numpy"]
+symgroupy = ["numpy"]
+wfnsympy = ["numpy"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shape_measure"]
