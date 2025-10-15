@@ -1,7 +1,8 @@
 # easy-shape
 ## Usage
-1. `uv`をインストール
+1. `uv`をインストール  
     https://github.com/astral-sh/uv
+
 2. 以下のような配位構造のcsvを準備
     ```
     Fe,12.345678,90.123456,7.890123
@@ -12,6 +13,6 @@
     Br,45.678901,23.456789,0.123456
     Br,56.789012,34.567890,1.234567
     ```
-3. `shape-measure`コマンドで測定
-    `uv run shape-measure test.csv`
+3. `shape-measure`コマンドで測定  
+    `uv run shape-measure test.csv`  
     `uv run shape-measure test.csv --ideal OC-6`
