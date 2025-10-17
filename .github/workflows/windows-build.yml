@@ -9,12 +9,30 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pipx install uv
-      - run: uv sync --python 3.11
-      - run: uv run python -m pip install -U "flet[all]==0.28.3" pyinstaller
-      - run: uv run flet pack src/shape_measure/gui.py --name "Easy Shape"
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          activate-environment: build
+          miniforge-version: latest
+          channels: conda-forge
+          use-mamba: true
+          python-version: "3.10"
+
+      - name: Toolchain & deps
+        shell: bash -l {0}
+        run: |
+          mamba install -y fortran-compiler pip numpy=1.24 scipy=1.10
+          python -m pip install -U "setuptools<60"
+          python -m pip install --no-build-isolation "huckelpy==0.2.3"
+          python -m pip install -U --upgrade-strategy only-if-needed "cosymlib==0.11.1"
+          python -m pip install -U "flet[all]==0.28.3" pyinstaller
+
+      - name: Pack
+        shell: bash -l {0}
+        run: |
+          python -m flet pack src/shape_measure/gui.py --name "Easy Shape" --icon assets/icon.ico
+
       - uses: softprops/action-gh-release@v2
         with:
           files: dist/**
