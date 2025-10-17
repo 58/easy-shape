@@ -7,29 +7,27 @@ on:
 jobs:
   release:
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/setup-python@v5
         with:
-          auto-activate-base: false
-          activate-environment: build
-          miniforge-version: latest
-          channels: conda-forge
-          use-mamba: true
-          python-version: "3.10"
+          python-version: "3.10"      # ← 3.10 に固定（cp310 wheelを使う）
 
-      - name: Toolchain & deps
-        shell: bash -l {0}
+      - name: Install build tools
         run: |
-          mamba install -y fortran-compiler pip numpy=1.24 scipy=1.10
-          python -m pip install -U "setuptools<60"
+          python -m pip install -U pip
+          # 先にnumpyを入れて古い依存のメタ生成を安定化
+          python -m pip install -U "numpy<2" "setuptools<60"
+          # huckelpy は古い build 系なので build isolation を切っておくと安定
           python -m pip install --no-build-isolation "huckelpy==0.2.3"
-          python -m pip install -U --upgrade-strategy only-if-needed "cosymlib==0.11.1"
+          # cosymlib本体は wheel を使わせたいので only-binary 指定
+          python -m pip install --only-binary=:all: "cosymlib==0.11.1"
+          # GUI/パッカー
           python -m pip install -U "flet[all]==0.28.3" pyinstaller
 
-      - name: Pack
-        shell: bash -l {0}
+      - name: Pack with Flet (PyInstaller)
         run: |
           python -m flet pack src/shape_measure/gui.py --name "Easy Shape" --icon assets/icon.ico
 
