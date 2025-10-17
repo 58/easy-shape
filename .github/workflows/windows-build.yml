@@ -1,23 +1,39 @@
-- name: Toolchain & deps (fix)
-  shell: bash -l {0}
-  run: |
-    # （任意）確認用
-    conda info
-    which python
-    python -V
+name: Release EXE
 
-    # Fortran は保険（wfnsympy 等をソースビルドする場合に備えて）
-    mamba install -y fortran-compiler pip
+on:
+  push:
+    tags: ["v*.*.*"]
 
-    # ★ ここが肝：pip で numpy<2 と setuptools<60 を先に"必ず"入れる
-    python -m pip install -U "numpy<2" "scipy==1.10.1" "setuptools<60"
+jobs:
+  release:
+    runs-on: windows-latest
 
-    # huckelpy は古い build 系なので build isolation を切って numpy を使わせる
-    python -m pip install --no-build-isolation "huckelpy==0.2.3"
+    steps:
+      - uses: actions/checkout@v4
 
-    # cosymlib 本体（cp310 の wheel があるのでソースビルドに行かない）
-    #    wheelだけ使いたい場合は --only-binary=:all: を付けてもOK
-    python -m pip install -U "cosymlib==0.11.1"
+      # conda-forge 環境（Python 3.10）
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          activate-environment: build
+          miniforge-version: latest
+          channels: conda-forge
+          use-mamba: true
+          python-version: "3.10"
 
-    # GUI / パッカー
-    python -m pip install -U "flet[all]==0.28.3" pyinstaller
+      - name: Toolchain & deps (FINAL)
+        shell: bash -l {0}
+        run: |
+          # Fortran は保険（wfnsympy 等のソースビルドに備え）
+          mamba install -y fortran-compiler pip
+          python -V
+          which python
+
+          # ★ここが肝★ 先に「pip」で NumPy<2 / SciPy / setuptools<60 を入れる
+          python -m pip install -U "numpy<2" "scipy==1.10.1" "setuptools<60" wheel
+          python -m pip show numpy setuptools
+
+          # huckelpy は古い setup.py（numpy.distutils）前提 → build isolation を切る
+          PIP_NO_BUILD_ISOLATION=1 python -m pip install --no-use-pep517 "huckelpy==0.2.3"
+
+          # c
