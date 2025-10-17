@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["cosymlib"]
+dependencies = [
+  "cosymlib",
+  "flet[all]==0.28.2", # バージョンは例
+]
 
 # CLI コマンド: `shape-measure` を提供
 [project.scripts]
