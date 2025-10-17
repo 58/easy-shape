@@ -8,10 +8,11 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      # Miniforge(=conda-forge) 環境を用意
+      # conda-forge ベースの環境
       - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-activate-base: false
@@ -19,23 +20,9 @@ jobs:
           miniforge-version: latest
           channels: conda-forge
           use-mamba: true
-          python-version: "3.10"   # cosymlib の推奨に合わせる
+          python-version: "3.10"
 
-      - name: Install compilers & Python deps (conda-forge)
+      - name: Toolchain & pins
         shell: bash -l {0}
         run: |
-          mamba install -y fortran-compiler numpy=1.24 scipy=1.10 pip
-          python -m pip install -U "setuptools<60"          # ← cosymlib 推奨
-          python -m pip install -U "flet[all]==0.28.3" pyinstaller
-          python -m pip install -U cosymlib                 # ← Fortran拡張をビルド
-
-      - name: Pack with Flet (PyInstaller)
-        shell: bash -l {0}
-        run: |
-          python -m flet pack src/shape_measure/gui.py --name "Easy Shape"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: easy-shape-windows
-          path: dist/**
+          # Fortran は念のため（wfnsympy/huckelpy の wheel
