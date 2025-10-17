@@ -36,4 +36,18 @@ jobs:
           # huckelpy は古い setup.py（numpy.distutils）前提 → build isolation を切る
           PIP_NO_BUILD_ISOLATION=1 python -m pip install --no-use-pep517 "huckelpy==0.2.3"
 
-          # c
+          # cosymlib は cp310 の wheel を使わせる（ソースビルド禁止）
+          python -m pip install --only-binary=:all: "cosymlib==0.11.1"
+
+          # GUI/パッカー
+          python -m pip install -U "flet[all]==0.28.3" pyinstaller
+
+      - name: Pack with Flet (PyInstaller)
+        shell: bash -l {0}
+        run: |
+          python -m flet pack src/shape_measure/gui.py --name "Easy Shape" --icon assets/icon.ico
+          ls -R dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
