@@ -45,8 +45,11 @@ jobs:
       - name: Pack with Flet (PyInstaller)
         shell: bash -l {0}
         run: |
-          python -m flet pack src/shape_measure/gui.py --name "Easy Shape" --icon assets/icon.ico
-          ls -R dist
+          which flet || where flet
+          flet --version
+          flet pack src/shape_measure/gui.py --name "Easy Shape"
+          ls -R dist  # 出力確認（Windowsなら: dir dist /s）
+
 
       - uses: softprops/action-gh-release@v2
         with:
